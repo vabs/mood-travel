@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SearchForm from "../components/SearchForm.astro";
+
+const synonyms = await getCollection("synonyms");
+const featured = synonyms.filter((s) => s.data.featured);
+---
+
+<BaseLayout title="What feels closest right now?">
+  <h1>What feels closest right now?</h1>
+  <SearchForm />
+  {
+    featured.length > 0 && (
+      <ul class="featured-terms">
+        {featured.map((s) => (
+          <li>
+            <a href={`/feeling/${s.data.term.replace(/\s+/g, "-")}/`}>{s.data.term}</a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  <p><a href="/feelings/">Browse every feeling</a> instead.</p>
+</BaseLayout>

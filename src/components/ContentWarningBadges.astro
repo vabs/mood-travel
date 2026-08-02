@@ -1,0 +1,20 @@
+---
+import { contentWarningLabel } from "../lib/content-warnings";
+
+interface Props {
+  warnings: string[];
+}
+
+const { warnings } = Astro.props;
+---
+
+{
+  warnings.length > 0 && (
+    <div class="warning-badges">
+      <span class="visually-hidden">Content warnings:</span>
+      {warnings.map((id) => (
+        <span class="warning-badge">{contentWarningLabel(id)}</span>
+      ))}
+    </div>
+  )
+}

@@ -1,0 +1,27 @@
+---
+interface Candidate {
+  moodId: string;
+  label: string;
+}
+
+interface Props {
+  query: string;
+  candidates: Candidate[];
+}
+
+const { query, candidates } = Astro.props;
+---
+
+<p>&ldquo;{query}&rdquo; could mean a few things — did you mean:</p>
+<ul class="candidate-list">
+  {
+    candidates.map((c) => (
+      <li>
+        <a href={`/feeling/${c.moodId}/`}>{c.label}</a>
+      </li>
+    ))
+  }
+</ul>
+<p>
+  Not quite it? <a href="/feelings/">Browse every feeling</a> instead.
+</p>

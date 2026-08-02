@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+
+const moods = await getCollection("moods");
+const synonyms = await getCollection("synonyms");
+const datalistOptions = [
+  ...new Set([...moods.map((m) => m.data.label), ...synonyms.map((s) => s.data.term)]),
+].sort();
+---
+
+<form class="search-form" action="/feelings/" method="get" role="search">
+  <label for="feeling-search">What feels closest right now?</label>
+  <div class="search-row">
+    <input
+      id="feeling-search"
+      name="q"
+      type="text"
+      list="known-terms"
+      autocomplete="off"
+      placeholder="e.g. anxious, lonely, overwhelmed"
+    />
+    <button type="submit">Browse feelings</button>
+  </div>
+  <datalist id="known-terms">
+    {datalistOptions.map((term) => <option value={term} />)}
+  </datalist>
+  <noscript>
+    <p>JavaScript is off — browse the full list of feelings below instead of live search.</p>
+  </noscript>
+</form>
+<div id="live-results" aria-live="polite"></div>
+
+<script>
+  import { initLiveSearch } from "../scripts/live-search";
+  initLiveSearch();
+</script>

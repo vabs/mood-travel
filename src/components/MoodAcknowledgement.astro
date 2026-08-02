@@ -1,0 +1,14 @@
+---
+interface Props {
+  query: string;
+  moodLabel: string;
+  shortDescription: string;
+}
+
+const { query, moodLabel, shortDescription } = Astro.props;
+---
+
+<p class="mood-ack">
+  Showing routes related to &ldquo;{query}&rdquo; — <strong>{moodLabel}</strong>.
+  {shortDescription}
+</p>

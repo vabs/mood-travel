@@ -1,0 +1,123 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ResourceRow from "../../../components/ResourceRow.astro";
+import { contentWarningLabel } from "../../../lib/content-warnings";
+
+export async function getStaticPaths() {
+  const journeys = await getCollection("journeys");
+  const recommendations = await getCollection("recommendations");
+  const resources = await getCollection("resources");
+
+  return journeys
+    .filter((j) => j.data.status === "published")
+    .map((journey) => {
+      const entries = recommendations
+        .filter((r) => r.data.journey_id.id === journey.data.id)
+        .sort((a, b) => a.data.priority - b.data.priority)
+        .map((r) => ({ rec: r.data, resource: resources.find((res) => res.data.id === r.data.resource_id.id)!.data }));
+
+      const types = [...new Set(entries.map((e) => e.resource.type))];
+      const grouped = types.map((type) => ({ type, entries: entries.filter((e) => e.resource.type === type) }));
+
+      return {
+        params: { journey: journey.data.id },
+        props: {
+          journey: journey.data,
+          grouped,
+          allTempos: [...new Set(entries.map((e) => e.rec.tempo))],
+          allAvailabilities: [...new Set(entries.map((e) => e.resource.availability))],
+          allWarnings: [...new Set(entries.flatMap((e) => e.resource.content_warnings))],
+        },
+      };
+    });
+}
+
+const { journey, grouped, allTempos, allAvailabilities, allWarnings } = Astro.props;
+---
+
+<BaseLayout title={journey.name} description={journey.rationale}>
+  <h1>{journey.name}</h1>
+  <p class="rationale">{journey.rationale}</p>
+
+  {
+    (grouped.length > 1 || allTempos.length > 1 || allAvailabilities.length > 1 || allWarnings.length > 0) && (
+      <details class="refine">
+        <summary>Filter these resources</summary>
+        <form class="resource-filter-form">
+          {grouped.length > 1 && (
+            <fieldset>
+              <legend>Media type</legend>
+              {grouped.map(({ type }) => (
+                <label>
+                  <input type="checkbox" name="type" value={type} /> {type}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {allTempos.length > 1 && (
+            <fieldset>
+              <legend>Time &amp; attention</legend>
+              {allTempos.map((t) => (
+                <label>
+                  <input type="checkbox" name="tempo" value={t} /> {t}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {allAvailabilities.length > 1 && (
+            <fieldset>
+              <legend>Availability</legend>
+              {allAvailabilities.map((a) => (
+                <label>
+                  <input type="checkbox" name="availability" value={a} /> {a}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {allWarnings.length > 0 && (
+            <fieldset>
+              <legend>Hide resources with these content warnings</legend>
+              {allWarnings.map((w) => (
+                <label>
+                  <input type="checkbox" name="exclude_warning" value={w} /> {contentWarningLabel(w)}
+                </label>
+              ))}
+            </fieldset>
+          )}
+        </form>
+      </details>
+    )
+  }
+
+  {
+    grouped.map(({ type, entries }) => (
+      <section class="type-group">
+        <h2>{type}</h2>
+        {entries.map(({ rec, resource }) => (
+          <ResourceRow
+            id={rec.id}
+            title={resource.title}
+            creator={resource.creator}
+            type={resource.type}
+            canonicalUrl={resource.canonical_url}
+            timeToStart={resource.time_to_start}
+            duration={resource.duration}
+            availability={resource.availability}
+            contentWarnings={resource.content_warnings}
+            sourceUrl={resource.source_url}
+            contributor={resource.contributor}
+            lastChecked={resource.last_checked}
+            tempo={rec.tempo}
+            rationale={rec.rationale}
+          />
+        ))}
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<script>
+  import { initResourceFilter } from "../../../scripts/resource-filter";
+  initResourceFilter();
+</script>

@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const moods = await getCollection("moods");
+const families = [...new Set(moods.map((m) => m.data.family))];
+const byFamily = families.map((family) => ({
+  family,
+  moods: moods
+    .filter((m) => m.data.family === family)
+    .sort((a, b) => ["mild", "medium", "intense"].indexOf(a.data.intensity) - ["mild", "medium", "intense"].indexOf(b.data.intensity)),
+}));
+---
+
+<BaseLayout title="Browse every feeling" description="Every feeling in mood-travel's taxonomy, grouped by family.">
+  <h1>Browse every feeling</h1>
+  <p>
+    This full list works with JavaScript off. Pick whatever feels closest —
+    there's no single correct label for how you feel.
+  </p>
+  {
+    byFamily.map(({ family, moods: familyMoods }) => (
+      <section class="mood-family-group">
+        <h2>{family}</h2>
+        <ul>
+          {familyMoods.map((m) => (
+            <li>
+              <a class="chip-link" href={`/feeling/${m.data.id}/`}>{m.data.label}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>

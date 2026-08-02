@@ -1,0 +1,68 @@
+---
+import ContentWarningBadges from "./ContentWarningBadges.astro";
+import TempoLabel from "./TempoLabel.astro";
+import type { Tempo } from "../lib/tempo";
+
+interface Props {
+  id: string;
+  title: string;
+  creator: string;
+  type: string;
+  canonicalUrl: string;
+  timeToStart: string;
+  duration?: string;
+  availability: string;
+  contentWarnings: string[];
+  sourceUrl?: string;
+  contributor: string;
+  lastChecked: string;
+  tempo: Tempo;
+  rationale: string;
+}
+
+const {
+  id,
+  title,
+  creator,
+  type,
+  canonicalUrl,
+  timeToStart,
+  duration,
+  availability,
+  contentWarnings,
+  sourceUrl,
+  contributor,
+  lastChecked,
+  tempo,
+  rationale,
+} = Astro.props;
+
+const domain = new URL(canonicalUrl).hostname.replace(/^www\./, "");
+---
+
+<details
+  class="resource-row"
+  id={`resource-${id}`}
+  data-type={type}
+  data-tempo={tempo}
+  data-availability={availability}
+  data-warnings={contentWarnings.join(" ")}
+>
+  <summary>{title} — <span class="creator">{creator}</span></summary>
+  <div class="resource-detail">
+    <p>{rationale}</p>
+    <p class="commitment">
+      <TempoLabel tempo={tempo} timeToStart={timeToStart} duration={duration} />
+      · {availability}
+    </p>
+    <ContentWarningBadges warnings={contentWarnings} />
+    <p class="provenance">
+      Added by {contributor}, last checked {lastChecked}.
+      {sourceUrl && <> <a href={sourceUrl}>More about this resource</a>.</>}
+      Opens {domain} — leaves mood-travel.
+    </p>
+    <a class="open-resource" href={canonicalUrl} rel="noopener noreferrer" target="_blank">
+      Open resource →
+    </a>
+  </div>
+</details>

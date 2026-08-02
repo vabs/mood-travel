@@ -1,0 +1,156 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import MoodAcknowledgement from "../../../components/MoodAcknowledgement.astro";
+import CandidateList from "../../../components/CandidateList.astro";
+import RouteCard from "../../../components/RouteCard.astro";
+import { resolveSearch, type SearchableMood, type SearchableSynonym } from "../../../lib/resolveSearch";
+
+export async function getStaticPaths() {
+  const moods = await getCollection("moods");
+  const synonyms = await getCollection("synonyms");
+
+  const searchableMoods: SearchableMood[] = moods.map((m) => ({ id: m.data.id, label: m.data.label }));
+  const searchableSynonyms: SearchableSynonym[] = synonyms.map((s) => ({
+    term: s.data.term,
+    candidates: s.data.candidates.map((c) => ({ moodId: c.mood_id.id, confidence: c.confidence })),
+  }));
+
+  const terms = new Set<string>([...moods.map((m) => m.data.id), ...synonyms.map((s) => s.data.term)]);
+
+  return [...terms].map((term) => ({
+    params: { term: term.replace(/\s+/g, "-") },
+    props: {
+      displayQuery: term,
+      result: resolveSearch(term, searchableMoods, searchableSynonyms),
+    },
+  }));
+}
+
+const { displayQuery, result } = Astro.props;
+
+const moods = await getCollection("moods");
+const journeys = await getCollection("journeys");
+const recommendations = await getCollection("recommendations");
+const resources = await getCollection("resources");
+
+function moodById(id: string) {
+  return moods.find((m) => m.data.id === id)!;
+}
+
+function routesForMood(moodId: string) {
+  return journeys
+    .filter((j) => j.data.status === "published" && j.data.starting_mood_id.id === moodId)
+    .map((journey) => {
+      const recs = recommendations
+        .filter((r) => r.data.journey_id.id === journey.data.id)
+        .sort((a, b) => a.data.priority - b.data.priority)
+        .map((r) => ({ rec: r, resource: resources.find((res) => res.data.id === r.data.resource_id.id)! }));
+
+      return {
+        journey,
+        preview: recs.slice(0, 2).map(({ resource }) => ({ title: resource.data.title, type: resource.data.type })),
+        availableTypes: [...new Set(recs.map(({ resource }) => resource.data.type))],
+        availableTempos: [...new Set(recs.map(({ rec }) => rec.data.tempo))],
+      };
+    });
+}
+
+const routes = result.state === "exact" ? routesForMood(result.moodId) : [];
+const allManageableFeelings = [...new Set(routes.flatMap((r) => r.journey.data.manageable_feelings))];
+const allTypes = [...new Set(routes.flatMap((r) => r.availableTypes))];
+const allTempos = [...new Set(routes.flatMap((r) => r.availableTempos))];
+---
+
+<BaseLayout title={`Routes for "${displayQuery}"`}>
+  {
+    result.state === "exact" && (
+      <>
+        <MoodAcknowledgement
+          query={displayQuery}
+          moodLabel={moodById(result.moodId).data.label}
+          shortDescription={moodById(result.moodId).data.short_description}
+        />
+        {routes.length === 0 ? (
+          <p class="empty-state">
+            We don't have curated routes from {moodById(result.moodId).data.label} yet.{" "}
+            <a href="/feelings/">Browse other feelings</a> that do.
+          </p>
+        ) : (
+          <>
+            {(allManageableFeelings.length > 0 || allTypes.length > 0 || allTempos.length > 0) && (
+              <details class="refine">
+                <summary>Refine these routes</summary>
+                <form class="refine-form">
+                  {allManageableFeelings.length > 0 && (
+                    <fieldset>
+                      <legend>What would feel manageable?</legend>
+                      {allManageableFeelings.map((f) => (
+                        <label>
+                          <input type="checkbox" name="manageable_feeling" value={f} /> {f}
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
+                  {allTypes.length > 0 && (
+                    <fieldset>
+                      <legend>Media type</legend>
+                      {allTypes.map((t) => (
+                        <label>
+                          <input type="checkbox" name="media_type" value={t} /> {t}
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
+                  {allTempos.length > 0 && (
+                    <fieldset>
+                      <legend>Time &amp; attention</legend>
+                      {allTempos.map((t) => (
+                        <label>
+                          <input type="checkbox" name="tempo" value={t} /> {t}
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
+                </form>
+              </details>
+            )}
+            <ul class="route-cards">
+              {routes.map((r) => (
+                <RouteCard
+                  journeyId={r.journey.data.id}
+                  name={r.journey.data.name}
+                  rationale={r.journey.data.rationale}
+                  manageableFeelings={r.journey.data.manageable_feelings}
+                  availableTypes={r.availableTypes}
+                  availableTempos={r.availableTempos}
+                  preview={r.preview}
+                />
+              ))}
+            </ul>
+          </>
+        )}
+      </>
+    )
+  }
+  {
+    result.state === "candidates" && (
+      <CandidateList
+        query={displayQuery}
+        candidates={result.candidates.map((c) => ({ moodId: c.moodId, label: moodById(c.moodId).data.label }))}
+      />
+    )
+  }
+  {
+    result.state === "no-match" && (
+      <p class="empty-state">
+        No routes match "{result.query}" yet. <a href="/feelings/">Browse every feeling</a> instead.
+      </p>
+    )
+  }
+</BaseLayout>
+
+<script>
+  import { initRouteRefine } from "../../../scripts/route-refine";
+  initRouteRefine();
+</script>

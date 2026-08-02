@@ -1,0 +1,14 @@
+---
+import { tempoLabel, summarizeCommitment, type Tempo } from "../lib/tempo";
+
+interface Props {
+  tempo: Tempo;
+  timeToStart: string;
+  duration?: string;
+}
+
+const { tempo, timeToStart, duration } = Astro.props;
+---
+
+<span class="tempo-pill">{tempoLabel(tempo)}</span>
+<span class="commitment">{summarizeCommitment(timeToStart, duration)}</span>
