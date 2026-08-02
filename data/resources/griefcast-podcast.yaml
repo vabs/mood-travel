@@ -1,0 +1,11 @@
+id: griefcast-podcast
+type: podcast
+title: Griefcast
+creator: Cariad Lloyd
+canonical_url: https://cariadlloyd.com/griefcast
+language: en
+time_to_start: immediate
+availability: free
+content_warnings: [grief-and-loss]
+last_checked: "2026-08-02"
+contributor: vabs

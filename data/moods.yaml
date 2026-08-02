@@ -1,0 +1,221 @@
+# The 24-node Plutchik wheel: 8 families x 3 intensities.
+# wheel_position (1-8) is shared within a family; opposite pairs sit 4 apart,
+# matching DESIGN.md's 4 stated opposite pairs: joy<->sadness, trust<->disgust,
+# fear<->anger, anticipation<->surprise. valence is a text-equivalent cue only
+# (pleasant/unpleasant/neutral) - never the sole signal for anything in the UI.
+
+serenity:
+  id: serenity
+  label: Serenity
+  family: joy
+  intensity: mild
+  wheel_position: 1
+  valence: pleasant
+  short_description: A calm, unhurried, low-key contentment.
+
+joy:
+  id: joy
+  label: Joy
+  family: joy
+  intensity: medium
+  wheel_position: 1
+  valence: pleasant
+  short_description: A clear, positive lift - things feel good right now.
+
+ecstasy:
+  id: ecstasy
+  label: Ecstasy
+  family: joy
+  intensity: intense
+  wheel_position: 1
+  valence: pleasant
+  short_description: Joy at its most overwhelming, almost too big to hold still.
+
+acceptance:
+  id: acceptance
+  label: Acceptance
+  family: trust
+  intensity: mild
+  wheel_position: 2
+  valence: pleasant
+  short_description: A milder trust - a willingness to let something be as it is.
+
+trust:
+  id: trust
+  label: Trust
+  family: trust
+  intensity: medium
+  wheel_position: 2
+  valence: pleasant
+  short_description: A settled sense that someone or something is safe to rely on.
+
+admiration:
+  id: admiration
+  label: Admiration
+  family: trust
+  intensity: intense
+  wheel_position: 2
+  valence: pleasant
+  short_description: Deep, wholehearted trust - looking up to someone or something.
+
+apprehension:
+  id: apprehension
+  label: Apprehension
+  family: fear
+  intensity: mild
+  wheel_position: 3
+  valence: unpleasant
+  short_description: A milder, background version of fear - wariness more than alarm.
+
+fear:
+  id: fear
+  label: Fear
+  family: fear
+  intensity: medium
+  wheel_position: 3
+  valence: unpleasant
+  short_description: The on-alert, keyed-up feeling of sensing a threat, real or not.
+
+terror:
+  id: terror
+  label: Terror
+  family: fear
+  intensity: intense
+  wheel_position: 3
+  valence: unpleasant
+  short_description: Fear at its most overwhelming and hard to think past.
+
+distraction:
+  id: distraction
+  label: Distraction
+  family: surprise
+  intensity: mild
+  wheel_position: 4
+  valence: neutral
+  short_description: A light, passing jolt that pulls attention somewhere new.
+
+surprise:
+  id: surprise
+  label: Surprise
+  family: surprise
+  intensity: medium
+  wheel_position: 4
+  valence: neutral
+  short_description: The jolt of something unexpected, before it's clear if it's good or bad.
+
+amazement:
+  id: amazement
+  label: Amazement
+  family: surprise
+  intensity: intense
+  wheel_position: 4
+  valence: neutral
+  short_description: Surprise at its most overwhelming - stopped in your tracks.
+
+pensiveness:
+  id: pensiveness
+  label: Pensiveness
+  family: sadness
+  intensity: mild
+  wheel_position: 5
+  valence: unpleasant
+  short_description: A quiet, reflective low mood - more thoughtful than heavy.
+
+sadness:
+  id: sadness
+  label: Sadness
+  family: sadness
+  intensity: medium
+  wheel_position: 5
+  valence: unpleasant
+  short_description: A heavy, low feeling, often about a loss or a gap.
+
+grief:
+  id: grief
+  label: Grief
+  family: sadness
+  intensity: intense
+  wheel_position: 5
+  valence: unpleasant
+  short_description: Sadness at its most consuming, usually tied to losing someone or something specific.
+
+boredom:
+  id: boredom
+  label: Boredom
+  family: disgust
+  intensity: mild
+  wheel_position: 6
+  valence: unpleasant
+  short_description: Restless, under-stimulated, a bit checked out.
+
+disgust:
+  id: disgust
+  label: Disgust
+  family: disgust
+  intensity: medium
+  wheel_position: 6
+  valence: unpleasant
+  short_description: A strong pulling-away feeling from something that feels wrong or repellent.
+
+loathing:
+  id: loathing
+  label: Loathing
+  family: disgust
+  intensity: intense
+  wheel_position: 6
+  valence: unpleasant
+  short_description: Disgust at its most intense - revulsion that's hard to shake.
+
+annoyance:
+  id: annoyance
+  label: Annoyance
+  family: anger
+  intensity: mild
+  wheel_position: 7
+  valence: unpleasant
+  short_description: A mild, low-grade irritation.
+
+anger:
+  id: anger
+  label: Anger
+  family: anger
+  intensity: medium
+  wheel_position: 7
+  valence: unpleasant
+  short_description: The charged, want-to-push-back feeling when something feels wrong or unfair.
+
+rage:
+  id: rage
+  label: Rage
+  family: anger
+  intensity: intense
+  wheel_position: 7
+  valence: unpleasant
+  short_description: Anger at its most overwhelming, hard to think past or contain.
+
+interest:
+  id: interest
+  label: Interest
+  family: anticipation
+  intensity: mild
+  wheel_position: 8
+  valence: pleasant
+  short_description: A light curiosity about what happens next.
+
+anticipation:
+  id: anticipation
+  label: Anticipation
+  family: anticipation
+  intensity: medium
+  wheel_position: 8
+  valence: pleasant
+  short_description: A forward-leaning, hopeful sense of looking ahead to what's coming.
+
+vigilance:
+  id: vigilance
+  label: Vigilance
+  family: anticipation
+  intensity: intense
+  wheel_position: 8
+  valence: neutral
+  short_description: Anticipation at its most intense - keyed up and watching closely for what's next.

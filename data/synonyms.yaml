@@ -1,0 +1,231 @@
+# Free-text term -> ranked mood candidates with a confidence score.
+# featured: true surfaces the term as a shortcut on the empty-search home
+# state (DESIGN.md names anxious/lonely/overwhelmed as the literal examples).
+# See src/lib/resolveSearch.ts for how confidence decides exact vs candidates
+# vs no-match.
+
+anxious:
+  term: anxious
+  featured: true
+  candidates:
+    - mood_id: fear
+      confidence: 0.92
+    - mood_id: apprehension
+      confidence: 0.55
+
+worried:
+  term: worried
+  featured: false
+  candidates:
+    - mood_id: fear
+      confidence: 0.85
+    - mood_id: apprehension
+      confidence: 0.6
+
+nervous:
+  term: nervous
+  featured: false
+  candidates:
+    - mood_id: fear
+      confidence: 0.78
+    - mood_id: apprehension
+      confidence: 0.6
+
+lonely:
+  term: lonely
+  featured: true
+  candidates:
+    - mood_id: sadness
+      confidence: 0.9
+
+empty:
+  term: empty
+  featured: false
+  candidates:
+    - mood_id: sadness
+      confidence: 0.55
+    - mood_id: boredom
+      confidence: 0.5
+    - mood_id: pensiveness
+      confidence: 0.45
+
+overwhelmed:
+  term: overwhelmed
+  featured: true
+  candidates:
+    - mood_id: fear
+      confidence: 0.6
+    - mood_id: anger
+      confidence: 0.45
+    - mood_id: terror
+      confidence: 0.35
+
+burnt-out:
+  term: "burnt out"
+  featured: false
+  candidates:
+    - mood_id: boredom
+      confidence: 0.87
+    - mood_id: pensiveness
+      confidence: 0.4
+
+stressed:
+  term: stressed
+  featured: false
+  candidates:
+    - mood_id: fear
+      confidence: 0.7
+    - mood_id: anger
+      confidence: 0.5
+
+angry:
+  term: angry
+  featured: false
+  candidates:
+    - mood_id: anger
+      confidence: 0.95
+
+frustrated:
+  term: frustrated
+  featured: false
+  candidates:
+    - mood_id: anger
+      confidence: 0.8
+    - mood_id: annoyance
+      confidence: 0.7
+
+irritated:
+  term: irritated
+  featured: false
+  candidates:
+    - mood_id: annoyance
+      confidence: 0.88
+
+furious:
+  term: furious
+  featured: false
+  candidates:
+    - mood_id: rage
+      confidence: 0.93
+
+sad:
+  term: sad
+  featured: false
+  candidates:
+    - mood_id: sadness
+      confidence: 0.95
+
+heartbroken:
+  term: heartbroken
+  featured: false
+  candidates:
+    - mood_id: grief
+      confidence: 0.9
+
+down:
+  term: down
+  featured: false
+  candidates:
+    - mood_id: pensiveness
+      confidence: 0.75
+    - mood_id: sadness
+      confidence: 0.7
+
+blue:
+  term: blue
+  featured: false
+  candidates:
+    - mood_id: pensiveness
+      confidence: 0.7
+    - mood_id: sadness
+      confidence: 0.68
+
+grieving:
+  term: grieving
+  featured: false
+  candidates:
+    - mood_id: grief
+      confidence: 0.95
+
+disgusted:
+  term: disgusted
+  featured: false
+  candidates:
+    - mood_id: disgust
+      confidence: 0.9
+
+bored:
+  term: bored
+  featured: false
+  candidates:
+    - mood_id: boredom
+      confidence: 0.92
+
+happy:
+  term: happy
+  featured: false
+  candidates:
+    - mood_id: joy
+      confidence: 0.93
+
+joyful:
+  term: joyful
+  featured: false
+  candidates:
+    - mood_id: joy
+      confidence: 0.9
+
+content:
+  term: content
+  featured: false
+  candidates:
+    - mood_id: serenity
+      confidence: 0.85
+
+calm:
+  term: calm
+  featured: false
+  candidates:
+    - mood_id: serenity
+      confidence: 0.9
+
+safe:
+  term: safe
+  featured: false
+  candidates:
+    - mood_id: trust
+      confidence: 0.88
+    - mood_id: acceptance
+      confidence: 0.4
+
+hopeful:
+  term: hopeful
+  featured: false
+  candidates:
+    - mood_id: anticipation
+      confidence: 0.87
+
+excited:
+  term: excited
+  featured: false
+  candidates:
+    - mood_id: anticipation
+      confidence: 0.87
+    - mood_id: surprise
+      confidence: 0.4
+
+surprised:
+  term: surprised
+  featured: false
+  candidates:
+    - mood_id: surprise
+      confidence: 0.9
+
+curious:
+  term: curious
+  featured: false
+  candidates:
+    - mood_id: interest
+      confidence: 0.75
+    - mood_id: surprise
+      confidence: 0.4
