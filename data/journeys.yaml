@@ -50,4 +50,16 @@ anger-toward-pensiveness:
     Deliberately not routed toward anger's wheel-opposite (fear); reflection
     is a more honest, achievable next step than manufactured calm.
   manageable_feelings: [reflection]
-  status: draft
+  status: published
+
+boredom-toward-interest:
+  id: boredom-toward-interest
+  starting_mood_id: boredom
+  destination_mood_id: interest
+  name: Toward curiosity
+  rationale: >-
+    Boredom is a restless, under-stimulated feeling - sometimes the more
+    useful move isn't more stimulation, but something specific enough to
+    catch genuine attention.
+  manageable_feelings: [distraction, reflection]
+  status: published

@@ -84,9 +84,10 @@ describe("journeys.yaml", () => {
     }
   });
 
-  it("keeps the draft journey out of the published set", () => {
-    const draft = journeys.find((j) => j.id === "anger-toward-pensiveness");
-    expect(draft?.status).toBe("draft");
+  it("only emits status values the schema/build understand", () => {
+    for (const j of journeys) {
+      expect(["draft", "published"]).toContain(j.status);
+    }
   });
 });
 
