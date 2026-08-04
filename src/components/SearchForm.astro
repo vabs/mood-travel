@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { withBase } from "../lib/site";
 
 const moods = await getCollection("moods");
 const synonyms = await getCollection("synonyms");
@@ -8,7 +9,7 @@ const datalistOptions = [
 ].sort();
 ---
 
-<form class="search-form" action="/feelings/" method="get" role="search">
+<form class="search-form" action={withBase("/feelings/")} method="get" role="search">
   <label for="feeling-search">What feels closest right now?</label>
   <div class="search-row">
     <input

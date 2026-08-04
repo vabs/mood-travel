@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/site";
+
 interface Candidate {
   moodId: string;
   label: string;
@@ -17,11 +19,11 @@ const { query, candidates } = Astro.props;
   {
     candidates.map((c) => (
       <li>
-        <a href={`/feeling/${c.moodId}/`}>{c.label}</a>
+        <a href={withBase(`/feeling/${c.moodId}/`)}>{c.label}</a>
       </li>
     ))
   }
 </ul>
 <p>
-  Not quite it? <a href="/feelings/">Browse every feeling</a> instead.
+  Not quite it? <a href={withBase("/feelings/")}>Browse every feeling</a> instead.
 </p>

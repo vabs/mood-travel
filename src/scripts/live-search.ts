@@ -1,4 +1,5 @@
 import { resolveSearch, type SearchableMood, type SearchableSynonym, type SearchResult } from "../lib/resolveSearch";
+import { withBase } from "../lib/site";
 
 interface SearchIndex {
   moods: SearchableMood[];
@@ -19,7 +20,7 @@ export function initLiveSearch(): void {
   let latestResult: SearchResult = { state: "empty" };
   let debounceHandle: ReturnType<typeof setTimeout> | undefined;
 
-  fetch("/search-index.json")
+  fetch(withBase("/search-index.json"))
     .then((res) => res.json())
     .then((data: SearchIndex) => {
       index = data;
@@ -37,7 +38,7 @@ export function initLiveSearch(): void {
     if (result.state === "exact") {
       const mood = index.moods.find((m) => m.id === result.moodId);
       resultsEl.innerHTML = `<div class="live-result">
-        <a href="/feeling/${result.moodId}/">→ Routes for ${mood?.label ?? result.moodId}</a>
+        <a href="${withBase(`/feeling/${result.moodId}/`)}">→ Routes for ${mood?.label ?? result.moodId}</a>
       </div>`;
       return;
     }
@@ -45,7 +46,7 @@ export function initLiveSearch(): void {
       const items = result.candidates
         .map((c) => {
           const mood = index.moods.find((m) => m.id === c.moodId);
-          return `<li><a href="/feeling/${c.moodId}/">${mood?.label ?? c.moodId}</a></li>`;
+          return `<li><a href="${withBase(`/feeling/${c.moodId}/`)}">${mood?.label ?? c.moodId}</a></li>`;
         })
         .join("");
       resultsEl.innerHTML = `<div class="live-result">
@@ -55,7 +56,7 @@ export function initLiveSearch(): void {
       return;
     }
     resultsEl.innerHTML = `<div class="live-result">
-      <p>No routes match "${result.query}" yet. <a href="/feelings/">Browse every feeling</a> instead.</p>
+      <p>No routes match "${result.query}" yet. <a href="${withBase("/feelings/")}">Browse every feeling</a> instead.</p>
     </div>`;
   }
 
@@ -73,7 +74,7 @@ export function initLiveSearch(): void {
     if (!index) return; // no JS index yet — fall back to the native GET
     if (latestResult.state === "exact") {
       event.preventDefault();
-      window.location.href = `/feeling/${latestResult.moodId}/`;
+      window.location.href = withBase(`/feeling/${latestResult.moodId}/`);
     } else if (latestResult.state === "candidates") {
       // Never auto-navigate on an uncertain match — keep the disambiguation
       // list on screen and let the person click a specific option.

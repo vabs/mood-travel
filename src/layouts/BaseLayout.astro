@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { withBase } from "../lib/site";
 
 interface Props {
   title: string;
@@ -20,7 +21,7 @@ const { title, description = "Find curated routes from how you feel now toward h
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <a class="home-link" href="/">mood-travel</a>
+      <a class="home-link" href={withBase("/")}>mood-travel</a>
     </header>
     <main id="main">
       <slot />

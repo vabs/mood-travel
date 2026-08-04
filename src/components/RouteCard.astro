@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/site";
+
 interface PreviewResource {
   title: string;
   type: string;
@@ -23,7 +25,7 @@ const { journeyId, name, rationale, manageableFeelings, availableTypes, availabl
   data-types={availableTypes.join(" ")}
   data-tempos={availableTempos.join(" ")}
 >
-  <h3><a href={`/journey/${journeyId}/`}>{name}</a></h3>
+  <h3><a href={withBase(`/journey/${journeyId}/`)}>{name}</a></h3>
   <p class="rationale">{rationale}</p>
   {
     preview.length > 0 && (

@@ -5,6 +5,7 @@ import MoodAcknowledgement from "../../../components/MoodAcknowledgement.astro";
 import CandidateList from "../../../components/CandidateList.astro";
 import RouteCard from "../../../components/RouteCard.astro";
 import { resolveSearch, type SearchableMood, type SearchableSynonym } from "../../../lib/resolveSearch";
+import { withBase } from "../../../lib/site";
 
 export async function getStaticPaths() {
   const moods = await getCollection("moods");
@@ -74,7 +75,7 @@ const allTempos = [...new Set(routes.flatMap((r) => r.availableTempos))];
         {routes.length === 0 ? (
           <p class="empty-state">
             We don't have curated routes from {moodById(result.moodId).data.label} yet.{" "}
-            <a href="/feelings/">Browse other feelings</a> that do.
+            <a href={withBase("/feelings/")}>Browse other feelings</a> that do.
           </p>
         ) : (
           <>
@@ -144,7 +145,7 @@ const allTempos = [...new Set(routes.flatMap((r) => r.availableTempos))];
   {
     result.state === "no-match" && (
       <p class="empty-state">
-        No routes match "{result.query}" yet. <a href="/feelings/">Browse every feeling</a> instead.
+        No routes match "{result.query}" yet. <a href={withBase("/feelings/")}>Browse every feeling</a> instead.
       </p>
     )
   }
