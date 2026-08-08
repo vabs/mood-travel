@@ -89,6 +89,30 @@ describe("journeys.yaml", () => {
       expect(["draft", "published"]).toContain(j.status);
     }
   });
+
+  it("never publishes a journey to its start's wheel opposite", () => {
+    // DESIGN.md: Plutchik opposites are structural, not beneficial
+    // destinations — the app never uses a wheel opposite as an automatic
+    // (or editorial) recommendation target. Opposite pairs sit 4 apart.
+    const positionById = new Map(loadMoods().map((m) => [m.id, m.wheel_position]));
+    for (const j of journeys.filter((j) => j.status === "published")) {
+      const start = positionById.get(j.starting_mood_id)!;
+      const dest = positionById.get(j.destination_mood_id)!;
+      expect((start - dest + 8) % 8).not.toBe(4);
+    }
+  });
+
+  it("has at most 3 published journeys per starting mood", () => {
+    // The Explore ring shows at most 3 "explore next" chips; more published
+    // journeys than that would make the slice a silent editorial decision.
+    const byStart = new Map<string, number>();
+    for (const j of journeys.filter((j) => j.status === "published")) {
+      byStart.set(j.starting_mood_id, (byStart.get(j.starting_mood_id) ?? 0) + 1);
+    }
+    for (const [moodId, count] of byStart) {
+      expect(count, `published journeys starting at ${moodId}`).toBeLessThanOrEqual(3);
+    }
+  });
 });
 
 describe("resources.yaml + recommendations.yaml", () => {
