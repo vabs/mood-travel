@@ -21,6 +21,9 @@ const datalistOptions = [
       placeholder="e.g. anxious, lonely, overwhelmed"
     />
     <button type="submit">Browse feelings</button>
+    <button type="submit" class="explore-submit" formaction={withBase("/explore/")}>
+      Explore moods
+    </button>
   </div>
   <datalist id="known-terms">
     {datalistOptions.map((term) => <option value={term} />)}

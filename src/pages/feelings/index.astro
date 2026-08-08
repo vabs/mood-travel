@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SearchForm from "../../components/SearchForm.astro";
 import { withBase } from "../../lib/site";
 
 const moods = await getCollection("moods");
@@ -15,9 +16,13 @@ const byFamily = families.map((family) => ({
 
 <BaseLayout title="Browse every feeling" description="Every feeling in mood-travel's taxonomy, grouped by family.">
   <h1>Browse every feeling</h1>
+  <SearchForm />
   <p>
     This full list works with JavaScript off. Pick whatever feels closest —
     there's no single correct label for how you feel.
+  </p>
+  <p class="mode-toggle-inline">
+    Prefer a visual browse? <a href={withBase("/explore/")}>Explore moods</a> as a floating field.
   </p>
   {
     byFamily.map(({ family, moods: familyMoods }) => (

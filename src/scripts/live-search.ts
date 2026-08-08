@@ -24,6 +24,15 @@ export function initLiveSearch(): void {
     .then((res) => res.json())
     .then((data: SearchIndex) => {
       index = data;
+      // A ?q= arriving from another page (e.g. the Explore/Guided mode toggle,
+      // or the form's native GET landing on /feelings/) used to be silently
+      // dropped — carry it into the input and resolve it once.
+      const carried = new URLSearchParams(window.location.search).get("q");
+      if (carried && !input.value) {
+        input.value = carried;
+        latestResult = resolveSearch(carried, data.moods, data.synonyms);
+        render(latestResult, data);
+      }
     })
     .catch(() => {
       // Network/parse failure — the form's native GET to /feelings/ still works.
@@ -72,6 +81,19 @@ export function initLiveSearch(): void {
 
   form.addEventListener("submit", (event) => {
     if (!index) return; // no JS index yet — fall back to the native GET
+
+    // The "Explore moods" submit button switches mode: an exact match opens
+    // that mood's ring directly; anything else falls through to the native
+    // GET, which carries ?q= to /explore/ so the search isn't discarded.
+    const submitter = (event as SubmitEvent).submitter;
+    if (submitter instanceof HTMLElement && submitter.classList.contains("explore-submit")) {
+      if (latestResult.state === "exact") {
+        event.preventDefault();
+        window.location.href = withBase(`/explore/${latestResult.moodId}/`);
+      }
+      return;
+    }
+
     if (latestResult.state === "exact") {
       event.preventDefault();
       window.location.href = withBase(`/feeling/${latestResult.moodId}/`);

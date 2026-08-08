@@ -72,6 +72,11 @@ const allTempos = [...new Set(routes.flatMap((r) => r.availableTempos))];
           moodLabel={moodById(result.moodId).data.label}
           shortDescription={moodById(result.moodId).data.short_description}
         />
+        <p class="mode-toggle-inline">
+          <a href={withBase(`/explore/${result.moodId}/`)}>
+            Explore {moodById(result.moodId).data.label} visually
+          </a>
+        </p>
         {routes.length === 0 ? (
           <p class="empty-state">
             We don't have curated routes from {moodById(result.moodId).data.label} yet.{" "}
