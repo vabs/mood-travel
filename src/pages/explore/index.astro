@@ -1,0 +1,83 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { restPosition } from "../../lib/explore";
+import { withBase } from "../../lib/site";
+
+// Explore mode, depth 0: the floating field of all 24 moods. Everything is
+// server-rendered — real links at build-time rest positions — so the page is
+// fully navigable with JavaScript off. The physics enhancement (explore-field)
+// only ever animates these same elements; it never creates content.
+
+const moods = await getCollection("moods");
+const intensityOrder = ["mild", "medium", "intense"];
+const bubbles = moods
+  .map((m) => ({ ...m.data, ...restPosition(m.data) }))
+  // DOM order = family, then intensity — meaningful for keyboard/AT traversal
+  // and for the narrow-viewport flow layout, where position: absolute is off.
+  .sort(
+    (a, b) =>
+      a.wheel_position - b.wheel_position ||
+      intensityOrder.indexOf(a.intensity) - intensityOrder.indexOf(b.intensity),
+  );
+---
+
+<BaseLayout
+  title="Explore moods"
+  description="A floating field of every mood — pick the bubble that feels closest."
+>
+  <nav class="mode-toggle" aria-label="Mode">
+    <a href={withBase("/")}>← Guided routes</a>
+  </nav>
+
+  <h1>Explore moods</h1>
+
+  <form
+    class="search-form explore-search"
+    action={withBase("/feelings/")}
+    method="get"
+    role="search"
+  >
+    <label for="explore-search-input">What feels closest right now?</label>
+    <div class="search-row">
+      <input
+        id="explore-search-input"
+        name="q"
+        type="text"
+        autocomplete="off"
+        placeholder="e.g. anxious, lonely, overwhelmed"
+      />
+      <button type="submit">Search</button>
+    </div>
+    <noscript>
+      <p>JavaScript is off — the bubbles below are still plain links, or use the guided routes.</p>
+    </noscript>
+  </form>
+  <div id="explore-search-status" aria-live="polite"></div>
+
+  <ul class="bubble-field" data-bubble-field>
+    {
+      bubbles.map((b) => (
+        <li>
+          <a
+            class={`bubble bubble--${b.intensity}`}
+            href={withBase(`/explore/${b.id}/`)}
+            data-mood-id={b.id}
+            data-family={b.family}
+            style={`--rx:${(b.x * 100).toFixed(2)}%; --ry:${(b.y * 100).toFixed(2)}%; --bubble-hue:var(--family-${b.family});`}
+          >
+            {b.label}
+            <span class="visually-hidden">, {b.intensity} form of {b.family}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<script>
+  import { initExploreField } from "../../scripts/explore-field";
+  import { initExploreNav } from "../../scripts/explore-nav";
+  initExploreField();
+  initExploreNav();
+</script>

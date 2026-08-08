@@ -1,0 +1,156 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import ResourceRow from "../../../../components/ResourceRow.astro";
+import { contentWarningLabel } from "../../../../lib/content-warnings";
+import {
+  RESOURCE_TYPES,
+  TYPE_LABELS,
+  buildLeafEntries,
+  type ExploreJourney,
+  type ExploreRecommendation,
+} from "../../../../lib/explore";
+import { withBase } from "../../../../lib/site";
+
+// Explore mode, depth 2: the leaf. One page per (mood, type) pair that has at
+// least one resource — pairs with nothing are never generated, matching the
+// ring's absent type bubbles. The ordered list is the default reading surface
+// (DESIGN.md); the expanded state is the row's native <details>, addressable
+// as #resource-<recommendation-id>.
+
+export async function getStaticPaths() {
+  const moods = await getCollection("moods");
+  const journeys = await getCollection("journeys");
+  const recommendations = await getCollection("recommendations");
+  const resources = await getCollection("resources");
+
+  const journeyData: ExploreJourney[] = journeys.map((j) => ({
+    id: j.data.id,
+    starting_mood_id: j.data.starting_mood_id.id,
+    destination_mood_id: j.data.destination_mood_id.id,
+    name: j.data.name,
+    rationale: j.data.rationale,
+    status: j.data.status,
+  }));
+  const recData: ExploreRecommendation[] = recommendations.map((r) => ({
+    id: r.data.id,
+    resource_id: r.data.resource_id.id,
+    journey_id: r.data.journey_id.id,
+    tempo: r.data.tempo,
+    rationale: r.data.rationale,
+    priority: r.data.priority,
+  }));
+  const resourceData = resources.map((r) => r.data);
+
+  return moods.flatMap((mood) =>
+    RESOURCE_TYPES.flatMap((type) => {
+      const entries = buildLeafEntries(mood.data.id, type, journeyData, recData, resourceData);
+      if (entries.length === 0) return [];
+      return [
+        {
+          params: { mood: mood.data.id, type },
+          props: {
+            mood: mood.data,
+            type,
+            entries,
+            allTempos: [...new Set(entries.map((e) => e.tempo))],
+            allAvailabilities: [...new Set(entries.map((e) => e.resource.availability))],
+            allWarnings: [...new Set(entries.flatMap((e) => e.resource.content_warnings))],
+          },
+        },
+      ];
+    }),
+  );
+}
+
+const { mood, type, entries, allTempos, allAvailabilities, allWarnings } = Astro.props;
+---
+
+<BaseLayout
+  title={`Explore — ${mood.label} — ${TYPE_LABELS[type]}`}
+  description={`${TYPE_LABELS[type]} on curated routes from ${mood.label}.`}
+>
+  <nav class="mode-toggle" aria-label="Mode">
+    <a class="explore-back" href={withBase(`/explore/${mood.id}/`)}>← Back to {mood.label}</a>
+    <a data-guided-link href={withBase(`/feeling/${mood.id}/`)}>Guided routes</a>
+  </nav>
+
+  <h1>{mood.label} → {TYPE_LABELS[type]}</h1>
+  <p class="leaf-intro">
+    Ordered by editorial priority — how well each fits routes from {mood.label},
+    not a measure of effectiveness.
+  </p>
+
+  {
+    (allTempos.length > 1 || allAvailabilities.length > 1 || allWarnings.length > 0) && (
+      <details class="refine">
+        <summary>Filter these resources</summary>
+        <form class="resource-filter-form">
+          {allTempos.length > 1 && (
+            <fieldset>
+              <legend>Time &amp; attention</legend>
+              {allTempos.map((t) => (
+                <label>
+                  <input type="checkbox" name="tempo" value={t} /> {t}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {allAvailabilities.length > 1 && (
+            <fieldset>
+              <legend>Availability</legend>
+              {allAvailabilities.map((a) => (
+                <label>
+                  <input type="checkbox" name="availability" value={a} /> {a}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {allWarnings.length > 0 && (
+            <fieldset>
+              <legend>Hide resources with these content warnings</legend>
+              {allWarnings.map((w) => (
+                <label>
+                  <input type="checkbox" name="exclude_warning" value={w} /> {contentWarningLabel(w)}
+                </label>
+              ))}
+            </fieldset>
+          )}
+        </form>
+      </details>
+    )
+  }
+
+  <ol class="leaf-list">
+    {
+      entries.map((entry) => (
+        <li>
+          <p class="journey-context">On the route “{entry.journeyName}”</p>
+          <ResourceRow
+            id={entry.recId}
+            title={entry.resource.title}
+            creator={entry.resource.creator}
+            type={entry.resource.type}
+            canonicalUrl={entry.resource.canonical_url}
+            timeToStart={entry.resource.time_to_start}
+            duration={entry.resource.duration}
+            availability={entry.resource.availability}
+            contentWarnings={entry.resource.content_warnings}
+            sourceUrl={entry.resource.source_url}
+            contributor={entry.resource.contributor}
+            lastChecked={entry.resource.last_checked}
+            tempo={entry.tempo}
+            rationale={entry.rationale}
+          />
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>
+
+<script>
+  import { initResourceFilter } from "../../../../scripts/resource-filter";
+  import { initExploreNav } from "../../../../scripts/explore-nav";
+  initResourceFilter();
+  initExploreNav();
+</script>

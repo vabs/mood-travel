@@ -1,0 +1,146 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import {
+  TYPE_LABELS,
+  deriveExploreNext,
+  deriveTypeCounts,
+  type ExploreJourney,
+  type ExploreRecommendation,
+  type ResourceType,
+} from "../../../lib/explore";
+import { withBase } from "../../../lib/site";
+
+// Explore mode, depth 1: the ring. One page per mood. Type bubbles only exist
+// for types with at least one resource on a published journey from this mood
+// (absent, not dead ends); "explore next" chips come only from journeys.yaml.
+
+export async function getStaticPaths() {
+  const moods = await getCollection("moods");
+  const journeys = await getCollection("journeys");
+  const recommendations = await getCollection("recommendations");
+  const resources = await getCollection("resources");
+
+  const journeyData: ExploreJourney[] = journeys.map((j) => ({
+    id: j.data.id,
+    starting_mood_id: j.data.starting_mood_id.id,
+    destination_mood_id: j.data.destination_mood_id.id,
+    name: j.data.name,
+    rationale: j.data.rationale,
+    status: j.data.status,
+  }));
+  const recData: ExploreRecommendation[] = recommendations.map((r) => ({
+    id: r.data.id,
+    resource_id: r.data.resource_id.id,
+    journey_id: r.data.journey_id.id,
+    tempo: r.data.tempo,
+    rationale: r.data.rationale,
+    priority: r.data.priority,
+  }));
+  const resourceData = resources.map((r) => r.data);
+  const moodLabels = moods.map((m) => ({ id: m.data.id, label: m.data.label }));
+
+  return moods.map((mood) => {
+    const counts = deriveTypeCounts(mood.data.id, journeyData, recData, resourceData);
+    const typeEntries = Object.entries(counts) as [ResourceType, number][];
+    return {
+      params: { mood: mood.data.id },
+      props: {
+        mood: mood.data,
+        types: typeEntries.map(([type, count], i) => ({
+          type,
+          count,
+          angle: -90 + i * (360 / typeEntries.length),
+        })),
+        chips: deriveExploreNext(mood.data.id, journeyData, moodLabels),
+      },
+    };
+  });
+}
+
+const { mood, types, chips } = Astro.props;
+---
+
+<BaseLayout
+  title={`Explore — ${mood.label}`}
+  description={mood.short_description}
+>
+  <nav class="mode-toggle" aria-label="Mode">
+    <a class="explore-back" href={withBase("/explore/")}>← Back to all moods</a>
+    <a data-guided-link href={withBase(`/feeling/${mood.id}/`)}>Guided routes</a>
+  </nav>
+
+  <h1>{mood.label}</h1>
+  <p class="ring-description">{mood.short_description}</p>
+
+  <div class="mood-ring" style={`--center-bg:var(--family-${mood.family});`}>
+    <p class="ring-center" data-family={mood.family}>{mood.label}</p>
+
+    {
+      types.length > 0 && (
+        <>
+          <div class="ring-tethers" aria-hidden="true">
+            {types.map(({ angle }) => (
+              <div class="tether" style={`--angle:${angle}deg;`} />
+            ))}
+          </div>
+          <ul class="ring-types" aria-label={`Available media for ${mood.label}`}>
+            {types.map(({ type, count, angle }) => (
+              <li style={`--angle:${angle}deg;`}>
+                <a
+                  class="type-bubble"
+                  href={withBase(`/explore/${mood.id}/${type}/`)}
+                  data-type={type}
+                >
+                  {TYPE_LABELS[type]}
+                  <span class="count">
+                    {count}
+                    <span class="visually-hidden">
+                      {count === 1 ? " resource" : " resources"}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </div>
+
+  {
+    types.length === 0 && (
+      <p class="empty-state">
+        No curated routes start from {mood.label} yet — the catalog grows one
+        verified resource at a time. <a href={withBase("/explore/")}>Pick another mood</a>{" "}
+        or <a href={withBase("/feelings/")}>browse every feeling</a> in the guided picker.
+      </p>
+    )
+  }
+
+  {
+    chips.length > 0 && (
+      <section class="explore-next" aria-labelledby="explore-next-h">
+        <h2 id="explore-next-h">Explore next</h2>
+        <ul>
+          {chips.map((chip) => (
+            <li class="explore-next-chip">
+              <a href={withBase(`/explore/${chip.destinationMoodId}/`)}>
+                {chip.name} — toward {chip.destinationLabel}
+              </a>
+              <p class="chip-rationale">{chip.rationale}</p>
+              <a class="chip-guided" href={withBase(`/journey/${chip.journeyId}/`)}>
+                View this route in guided mode
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<script>
+  import { initExploreNav } from "../../../scripts/explore-nav";
+  initExploreNav();
+</script>

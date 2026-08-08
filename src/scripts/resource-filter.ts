@@ -1,6 +1,6 @@
-// Filters on /journey/[journey]/: unlike route refinement, these hide
-// non-matching resource rows outright — a person has already committed to
-// this route, so narrowing the list is the point.
+// Filters on /journey/[journey]/ and the Explore leaf: unlike route
+// refinement, these hide non-matching resource rows outright — a person has
+// already committed to this route, so narrowing the list is the point.
 export function initResourceFilter(): void {
   const form = document.querySelector<HTMLFormElement>(".resource-filter-form");
   if (!form) return;
@@ -28,7 +28,12 @@ export function initResourceFilter(): void {
       const matchesAvailability = availabilities.length === 0 || availabilities.includes(availability);
       const hasExcludedWarning = warnings.some((w) => excludedWarnings.includes(w));
 
-      row.hidden = !matchesType || !matchesTempo || !matchesAvailability || hasExcludedWarning;
+      const hide = !matchesType || !matchesTempo || !matchesAvailability || hasExcludedWarning;
+      row.hidden = hide;
+      // On the Explore leaf each row sits in an <li> alongside its journey
+      // context line — hiding only the row would strand that line.
+      const item = row.closest("li");
+      if (item) item.hidden = hide;
     }
 
     for (const group of document.querySelectorAll<HTMLElement>(".type-group")) {

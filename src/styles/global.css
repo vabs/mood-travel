@@ -1,3 +1,11 @@
+/* Cross-document view transitions. Same-origin navigations morph instead of
+   cutting; browsers without support just navigate, and reduced motion is
+   honoured below. This is what makes clicking a mood bubble feel like popping
+   it and moving inside rather than loading a page. */
+@view-transition {
+  navigation: auto;
+}
+
 :root {
   --bg: #fbfbfa;
   --text: #1b1b1f;
@@ -9,6 +17,19 @@
   --focus: #1a56db;
   --warning-bg: #fdf3e3;
   --warning-text: #7a4a00;
+
+  /* Explore mode — family palette. Hue steps evenly (45°) around the wheel by
+     wheel_position; lightness and chroma are CONSTANT across all 8 families so
+     no hue reads as objectively good or bad (DESIGN.md). Labels render in
+     --text on top of these — keep lightness high enough for >= 4.5:1. */
+  --family-joy: oklch(0.87 0.07 95);
+  --family-trust: oklch(0.87 0.07 140);
+  --family-fear: oklch(0.87 0.07 185);
+  --family-surprise: oklch(0.87 0.07 230);
+  --family-sadness: oklch(0.87 0.07 275);
+  --family-disgust: oklch(0.87 0.07 320);
+  --family-anger: oklch(0.87 0.07 5);
+  --family-anticipation: oklch(0.87 0.07 50);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +44,16 @@
     --focus: #7fb3dd;
     --warning-bg: #3a2c10;
     --warning-text: #f0c988;
+
+    /* Same constant-L/C rule, flipped dark; light --text stays >= 4.5:1. */
+    --family-joy: oklch(0.38 0.06 95);
+    --family-trust: oklch(0.38 0.06 140);
+    --family-fear: oklch(0.38 0.06 185);
+    --family-surprise: oklch(0.38 0.06 230);
+    --family-sadness: oklch(0.38 0.06 275);
+    --family-disgust: oklch(0.38 0.06 320);
+    --family-anger: oklch(0.38 0.06 5);
+    --family-anticipation: oklch(0.38 0.06 50);
   }
 }
 
@@ -392,4 +423,333 @@ h1 {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0 0 1.5rem;
+}
+
+/* ============================================================
+   Explore mode — floating bubble field, ring, leaf.
+   Positioning contract with explore-field.ts (the physics
+   enhancement): the sim only ever writes the custom properties
+   --tx / --ty / --s. The stylesheet owns `translate`/`scale`, so
+   :hover and :focus-visible cascade over the base rule instead of
+   being clobbered by per-frame inline styles (the prototype's
+   validated trick, DESIGN.md "UI — floating bubble field").
+   ============================================================ */
+
+.mode-toggle {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mode-toggle-inline {
+  margin-top: 0.75rem;
+}
+
+/* --- Depth 0: the field --- */
+
+.motion-toggle {
+  display: block;
+  margin: 1rem 0 0;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.bubble-field {
+  /* Twice as wide as tall — must match FIELD_ASPECT in src/lib/explore.ts,
+     which spreads the bubbles across the full field. Breaks out of the 720px
+     text column; header, search and footer stay in flow above and below. */
+  --field-w: min(96vw, 120vh);
+  --bubble-d: calc(var(--field-w) * 0.095);
+  position: relative;
+  list-style: none;
+  padding: 0;
+  width: var(--field-w);
+  height: calc(var(--field-w) / 2);
+  margin: 1.5rem 0 0 50%;
+  transform: translateX(-50%);
+}
+
+.bubble {
+  position: absolute;
+  left: var(--rx, 50%);
+  top: var(--ry, 50%);
+  translate: calc(-50% + var(--tx, 0px)) calc(-50% + var(--ty, 0px));
+  scale: var(--s, 1);
+  width: var(--bubble-d);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  padding: 0.2rem;
+  text-align: center;
+  /* Sized so even "Apprehension" fits on one line inside the circle. */
+  font-size: clamp(0.75rem, calc(var(--field-w) * 0.0125), 1.05rem);
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--text);
+  /* Soap-bubble fill: mostly transparent, tinted by the family hue, with the
+     highlight off-centre so it reads as a sphere rather than a flat disc. */
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      color-mix(in oklab, var(--bubble-hue, var(--card)) 52%, transparent),
+      color-mix(in oklab, var(--bubble-hue, var(--card)) 24%, transparent) 72%
+    );
+  border: 1px solid color-mix(in oklab, var(--bubble-hue, var(--card)) 60%, transparent);
+}
+
+/* Search de-emphasis. Kept mild on purpose: the label must stay readable, and
+   the aria-live status region carries the actual result in words. */
+.bubble--dimmed {
+  opacity: 0.72;
+}
+
+.bubble:hover,
+.bubble:focus-visible {
+  scale: calc(var(--s, 1) * 1.08);
+  border-color: color-mix(in oklab, var(--bubble-hue, var(--card)) 85%, transparent);
+}
+
+/* Intensity is distance from the centre, plus an inset ring, plus words in the
+   accessible name — never colour alone. Diameter is deliberately uniform: the
+   longest labels ("Apprehension", "Pensiveness") sit on the innermost, mildest
+   ring, so shrinking that ring would break words mid-syllable for no gain. */
+.bubble--intense {
+  box-shadow: inset 0 0 0 3px color-mix(in oklab, var(--bubble-hue, var(--card)) 70%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bubble {
+    transition: scale 160ms ease;
+  }
+
+  /* The overshoot is the "pop": the bubble swells slightly past the ring
+     centre before settling into it. */
+  ::view-transition-group(mood-portal) {
+    animation-duration: 420ms;
+    animation-timing-function: cubic-bezier(0.22, 1.15, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Narrow viewports: the absolute field would overlap — degrade to a wrapped
+   flow of the same links, ordered by family (DOM order). The physics script
+   checks this breakpoint and stays off here. */
+@media (max-width: 560px) {
+  .bubble-field {
+    /* Freed from the field geometry, bubbles no longer have to be a fraction
+       of the field width — size them to the label instead. */
+    --bubble-d: max(5.5rem, calc(var(--field-w) * 0.095));
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin-left: 0;
+    transform: none;
+  }
+
+  .bubble {
+    position: static;
+    translate: none;
+  }
+}
+
+/* --- Depth 1: the ring --- */
+
+.mood-ring {
+  position: relative;
+  width: min(92vw, 34rem);
+  aspect-ratio: 1;
+  margin: 1rem auto;
+  --ring-r: clamp(7rem, 32vmin, 11rem);
+}
+
+.ring-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  /* Tethers run from the exact centre outwards; the centre bubble sits on top
+     so each line only shows in the gap between the two bubbles it joins. */
+  z-index: 1;
+  /* Receives the clicked field bubble across the navigation, so the bubble
+     appears to swell and take you inside it. See explore-nav.ts. */
+  view-transition-name: mood-portal;
+  width: clamp(9rem, 38vmin, 13rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 1rem;
+  background: var(--center-bg, var(--card));
+  border: 1px solid color-mix(in oklab, var(--center-bg, var(--card)), var(--text) 18%);
+}
+
+.ring-center {
+  margin: 0;
+  font-size: clamp(1.2rem, 4.5vmin, 1.6rem);
+  font-weight: 600;
+}
+
+.ring-description {
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.ring-tethers .tether {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--ring-r);
+  border-top: 2px dashed var(--border);
+  transform-origin: left center;
+  transform: rotate(var(--angle));
+}
+
+.ring-types {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ring-types li {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(var(--angle)) translate(var(--ring-r))
+    rotate(calc(-1 * var(--angle)));
+}
+
+.type-bubble {
+  display: grid;
+  place-content: center;
+  gap: 0.15rem;
+  text-align: center;
+  width: clamp(4.5rem, 15vmin, 7rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.type-bubble:hover,
+.type-bubble:focus-visible {
+  border-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .type-bubble {
+    transition: scale 160ms ease;
+  }
+
+  .type-bubble:hover,
+  .type-bubble:focus-visible {
+    scale: 1.06;
+  }
+}
+
+.type-bubble .count {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Narrow viewports: the ring becomes a stacked center + wrapped row of the
+   same links — pure CSS, no JS measurement. */
+@media (max-width: 640px) {
+  .mood-ring {
+    width: 100%;
+    aspect-ratio: auto;
+  }
+
+  .ring-center {
+    position: static;
+    translate: none;
+    width: auto;
+    aspect-ratio: auto;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .ring-tethers {
+    display: none;
+  }
+
+  .ring-types {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .ring-types li {
+    position: static;
+    transform: none;
+  }
+}
+
+/* --- Explore-next chips + leaf --- */
+
+.empty-state {
+  max-width: 34rem;
+  margin: 1.5rem auto;
+}
+
+.explore-next ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.explore-next-chip {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: var(--card);
+}
+
+.chip-rationale {
+  color: var(--muted);
+  margin: 0.5rem 0;
+}
+
+.chip-guided {
+  font-size: 0.9rem;
+}
+
+.leaf-intro {
+  color: var(--muted);
+}
+
+.leaf-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.journey-context {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
 }
