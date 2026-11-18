@@ -63,3 +63,87 @@ boredom-toward-interest:
     catch genuine attention.
   manageable_feelings: [distraction, reflection]
   status: published
+
+joy-toward-interest:
+  id: joy-toward-interest
+  starting_mood_id: joy
+  destination_mood_id: interest
+  name: Follow the little details
+  rationale: >-
+    If things feel bright already, you might enjoy looking more closely at
+    the ordinary objects, colors, and places that catch your attention.
+    This route offers things to investigate without asking you to feel differently.
+  manageable_feelings: [reflection]
+  status: published
+
+serenity-toward-joy:
+  id: serenity-toward-joy
+  starting_mood_id: serenity
+  destination_mood_id: joy
+  name: A little brightness
+  rationale: >-
+    A quiet moment can leave room for something light and melodic.
+    These are small invitations to enjoy a sound or an image, with no
+    particular emotional destination required.
+  manageable_feelings: [calm]
+  status: published
+
+interest-toward-pensiveness:
+  id: interest-toward-pensiveness
+  starting_mood_id: interest
+  destination_mood_id: pensiveness
+  name: Look a little closer
+  rationale: >-
+    When a question has caught your attention, a longer piece of natural
+    history can offer details to linger over and assumptions to reconsider.
+    This is a route for thoughtful curiosity rather than quick answers.
+  manageable_feelings: [reflection]
+  status: published
+
+surprise-toward-pensiveness:
+  id: surprise-toward-pensiveness
+  starting_mood_id: surprise
+  destination_mood_id: pensiveness
+  name: A moment to notice
+  rationale: >-
+    Something unexpected can make familiar surroundings seem unfamiliar.
+    This route offers an optional pause to notice what is around you,
+    without needing to explain the surprise or decide what it means.
+  manageable_feelings: [reflection]
+  status: published
+
+amazement-toward-admiration:
+  id: amazement-toward-admiration
+  starting_mood_id: amazement
+  destination_mood_id: admiration
+  name: Wonder, in company
+  rationale: >-
+    If something has left you awestruck, conversations about music, nature,
+    and human generosity can be interesting company for that feeling.
+    This route explores other people's accounts rather than prescribing an experience.
+  manageable_feelings: [connection, reflection]
+  status: published
+
+trust-toward-admiration:
+  id: trust-toward-admiration
+  starting_mood_id: trust
+  destination_mood_id: admiration
+  name: Notice the connection
+  rationale: >-
+    When a relationship feels dependable, you might want to linger over
+    the ordinary moments that make it meaningful. This route offers
+    reflective reading about connection, without collecting personal memories.
+  manageable_feelings: [connection, reflection]
+  status: published
+
+disgust-toward-pensiveness:
+  id: disgust-toward-pensiveness
+  starting_mood_id: disgust
+  destination_mood_id: pensiveness
+  name: Make room for perspective
+  rationale: >-
+    If hypocrisy or cruelty has left you feeling repelled, a considered
+    account of moral emotions may offer language for what you noticed.
+    Difficult examples are disclosed so you can decide whether to read further.
+  manageable_feelings: [reflection]
+  status: published
