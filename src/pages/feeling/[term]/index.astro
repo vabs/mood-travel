@@ -64,6 +64,7 @@ const allTempos = [...new Set(routes.flatMap((r) => r.availableTempos))];
 ---
 
 <BaseLayout title={`Routes for "${displayQuery}"`}>
+  <h1>Routes for &ldquo;{displayQuery}&rdquo;</h1>
   {
     result.state === "exact" && (
       <>

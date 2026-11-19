@@ -2,6 +2,9 @@
 import { getCollection } from "astro:content";
 import { withBase } from "../lib/site";
 
+interface Props { compact?: boolean; }
+const { compact = false } = Astro.props;
+
 const moods = await getCollection("moods");
 const synonyms = await getCollection("synonyms");
 const datalistOptions = [
@@ -9,8 +12,8 @@ const datalistOptions = [
 ].sort();
 ---
 
-<form class="search-form" action={withBase("/feelings/")} method="get" role="search">
-  <label for="feeling-search">What feels closest right now?</label>
+<form class:list={["search-form", { "search-compact": compact }]} action={withBase("/feelings/")} method="get" role="search">
+  <label class:list={{ "visually-hidden": compact }} for="feeling-search">What feels closest right now?</label>
   <div class="search-row">
     <input
       id="feeling-search"
@@ -18,11 +21,11 @@ const datalistOptions = [
       type="text"
       list="known-terms"
       autocomplete="off"
-      placeholder="e.g. anxious, lonely, overwhelmed"
+      placeholder="Try anxious, lonely, curious…"
     />
-    <button type="submit">Browse feelings</button>
-    <button type="submit" class="explore-submit" formaction={withBase("/explore/")}>
-      Explore moods
+    {!compact && <button type="submit">Browse feelings</button>}
+    <button type="submit" class="explore-submit" formaction={withBase("/explore/")} aria-label={compact ? "Explore this feeling" : undefined}>
+      {compact ? "↗" : "Explore moods"}
     </button>
   </div>
   <datalist id="known-terms">

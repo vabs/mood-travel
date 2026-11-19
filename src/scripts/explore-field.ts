@@ -34,7 +34,7 @@ const EDGE_MARGIN_Y = EDGE_MARGIN_X * FIELD_ASPECT;
 const MOTION_KEY = "mood-travel:explore-motion";
 // Below this the field is a wrapped flow layout (see global.css) — offsetting
 // statically-positioned bubbles would fight the flow, so the sim stays off.
-const FIELD_LAYOUT_MIN_WIDTH = 561;
+const FIELD_LAYOUT_MIN_WIDTH = 701;
 
 interface Bubble {
   el: HTMLElement;

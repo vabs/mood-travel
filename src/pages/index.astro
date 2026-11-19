@@ -2,25 +2,45 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SearchForm from "../components/SearchForm.astro";
+import MoodAtlas from "../components/MoodAtlas.astro";
+import ResourcePreview from "../components/ResourcePreview.astro";
 import { withBase } from "../lib/site";
 
 const synonyms = await getCollection("synonyms");
 const featured = synonyms.filter((s) => s.data.featured);
+const resources = await getCollection("resources");
+const recommendations = await getCollection("recommendations");
+const journeys = await getCollection("journeys");
+const publishedIds = new Set(journeys.filter((j) => j.data.status === "published").map((j) => j.data.id));
+const picks = ["eno-music-for-airports", "little-prince", "paddington-2"].flatMap((id) => {
+  const resource = resources.find((r) => r.data.id === id);
+  const recommendation = recommendations.find((r) => r.data.resource_id.id === id && publishedIds.has(r.data.journey_id.id));
+  return resource && recommendation ? [{ resource, recommendation }] : [];
+});
 ---
 
-<BaseLayout title="What feels closest right now?">
-  <h1>What feels closest right now?</h1>
-  <SearchForm />
-  {
-    featured.length > 0 && (
-      <ul class="featured-terms">
-        {featured.map((s) => (
-          <li>
-            <a href={withBase(`/feeling/${s.data.term.replace(/\s+/g, "-")}/`)}>{s.data.term}</a>
-          </li>
-        ))}
-      </ul>
-    )
-  }
-  <p><a href={withBase("/feelings/")}>Browse every feeling</a> instead.</p>
+<BaseLayout title="How are you feeling?" wide>
+  <section class="home-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Mood-travel</p>
+      <h1>How are you<br />feeling?</h1>
+      <p class="intro">Explore books, music, films and stories that might fit how you feel.</p>
+      <SearchForm compact />
+      {featured.length > 0 && (
+        <div class="featured-shortcuts"><span>Try</span><ul class="featured-terms">
+          {featured.map((s) => <li><a href={withBase(`/feeling/${s.data.term.replace(/\s+/g, "-")}/`)}>{s.data.term}</a></li>)}
+        </ul></div>
+      )}
+      <a class="subtle-link" href={withBase("/feelings/")}>Browse every feeling</a>
+    </div>
+    <MoodAtlas />
+  </section>
+  <section class="home-collection" aria-labelledby="collection-heading">
+    <div class="section-heading"><div><p class="eyebrow">From the collection</p><h2 id="collection-heading">A few places to start.</h2></div><a href={withBase("/collection/")}>Browse the collection ↗</a></div>
+    <div class="preview-grid">{picks.map(({ resource, recommendation }) => <ResourcePreview resource={resource.data} recommendation={recommendation.data} />)}</div>
+  </section>
+  <script>
+    import { initExploreNav } from "../scripts/explore-nav";
+    initExploreNav();
+  </script>
 </BaseLayout>

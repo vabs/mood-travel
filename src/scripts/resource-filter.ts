@@ -5,7 +5,7 @@ export function initResourceFilter(): void {
   const form = document.querySelector<HTMLFormElement>(".resource-filter-form");
   if (!form) return;
 
-  const rows = [...document.querySelectorAll<HTMLDetailsElement>(".resource-row")];
+  const rows = [...document.querySelectorAll<HTMLElement>(".resource-row")];
 
   function selected(name: string): string[] {
     return [...form!.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map((i) => i.value);

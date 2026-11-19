@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ResourcePreview from "../../components/ResourcePreview.astro";
+import { withBase } from "../../lib/site";
+
+const resources = await getCollection("resources");
+const recommendations = await getCollection("recommendations");
+const journeys = await getCollection("journeys");
+const published = new Set(journeys.filter((j) => j.data.status === "published").map((j) => j.data.id));
+const entries = resources.flatMap((resource) => {
+  const recommendation = recommendations.find((r) => r.data.resource_id.id === resource.data.id && published.has(r.data.journey_id.id));
+  return recommendation ? [{ resource, recommendation }] : [];
+}).sort((a, b) => a.resource.data.title.localeCompare(b.resource.data.title));
+---
+<BaseLayout title="The collection" wide>
+  <nav class="mode-toggle" aria-label="Breadcrumb"><a href={withBase("/")}>← All moods</a></nav>
+  <header class="collection-intro"><p class="eyebrow">The collection</p><h1>Something to spend<br />a little time with.</h1><p class="intro">{entries.length} books, films, albums, articles and podcasts, chosen for the routes they might fit.</p></header>
+  <div class="preview-grid collection-grid">{entries.map(({ resource, recommendation }) => <ResourcePreview resource={resource.data} recommendation={recommendation.data} />)}</div>
+</BaseLayout>

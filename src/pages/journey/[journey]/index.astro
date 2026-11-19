@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ResourceRow from "../../../components/ResourceRow.astro";
 import { contentWarningLabel } from "../../../lib/content-warnings";
+import { withBase } from "../../../lib/site";
 
 export async function getStaticPaths() {
   const journeys = await getCollection("journeys");
@@ -37,6 +38,10 @@ const { journey, grouped, allTempos, allAvailabilities, allWarnings } = Astro.pr
 ---
 
 <BaseLayout title={journey.name} description={journey.rationale}>
+  <nav class="mode-toggle" aria-label="Breadcrumb">
+    <a href={withBase(`/explore/${journey.starting_mood_id.id}/`)}>← Explore {journey.starting_mood_id.id}</a>
+    <a href={withBase("/collection/")}>The collection ↗</a>
+  </nav>
   <h1>{journey.name}</h1>
   <p class="rationale">{journey.rationale}</p>
 

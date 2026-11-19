@@ -14,9 +14,8 @@ import { withBase } from "../../../../lib/site";
 
 // Explore mode, depth 2: the leaf. One page per (mood, type) pair that has at
 // least one resource — pairs with nothing are never generated, matching the
-// ring's absent type bubbles. The ordered list is the default reading surface
-// (DESIGN.md); the expanded state is the row's native <details>, addressable
-// as #resource-<recommendation-id>.
+// ring's absent type bubbles. Readable resource cards show rationale, metadata
+// and warnings before an external link, addressable as #resource-<recommendation-id>.
 
 export async function getStaticPaths() {
   const moods = await getCollection("moods");

@@ -15,9 +15,11 @@ ten recommendation placements for each `mood x category` combination: 1,200
 placements in total. Placements may reuse a canonical resource only when the
 route rationale is materially different.
 
-The current interactive prototype contains only twelve nodes. This catalog uses
-the complete Plutchik intensity set below; implementation must update the
-prototype taxonomy rather than silently dropping the other twelve.
+The production site uses all 24 Plutchik intensity nodes below. As of
+2026-11-18, the published YAML catalog contains 35 resources, 37 placements,
+and 12 journeys across 11 starting moods and all eight families. The research
+ledgers remain candidate lists; entries become public only when added to the
+validated YAML collections. The exploratory UI prototypes have been removed.
 
 | Family | Low intensity | Primary | High intensity |
 | --- | --- | --- | --- |

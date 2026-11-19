@@ -196,150 +196,54 @@ contributor-provided code.
   appeals, and removal/takedown handling.
 - Direct data PRs follow the same policy and CI as Issue Form submissions.
 
-## UI — floating bubble field
+## UI — neutral Mood Atlas
 
-Validated through 3 rounds of interactive prototyping at
-`prototype/bubble-mood-ui/index.html` (throwaway, see its `NOTES.md` for
-full history). Settled design:
+The approved production direction is the refined Mood Atlas, shipped in the
+actual Astro routes. Both exploratory prototype directories have been removed.
 
-**Default entry — guided route picker.** The home experience is a calm,
-text-first route picker, not the animated field. Its first and only required
-prompt is `What feels closest right now?`, answered by free-text search,
-common starting terms, or the semantic browse list. Once a person chooses a
-feeling, show two or three curator-defined routes with plain-language names,
-short rationales, time/attention expectations, and a small preview of their
-best resources. A person can open a route immediately without completing a
-multi-step wizard.
+**Home.** A neutral, spatial arrangement of eight labeled mood-family circles
+sits beside “How are you feeling?”, free-text search, and common feeling
+shortcuts. Circles use the same neutral fill; restrained sage indicates hover
+and keyboard focus. No color ranks feelings as good or bad. On phones the
+same links become a stable three-column grid with readable labels and no drift.
 
-Optional, dismissible refinements appear after the first answer: `What would
-feel manageable?` (for example, calm, connection, distraction, or reflection),
-`How much time do you have?`, and media type. They filter and reorder routes;
-they never diagnose the person or require a supposedly "positive" goal. Results
-are shown as an ordered list with filters, so the fastest path is always
-predictable and readable.
+**Collection.** Three recommendations introduce the catalog on the home page.
+Cards show media type, concrete duration when known, title and creator, with
+consistent borders, spacing and links. `/collection/` lists canonical resources
+with published placements, without duplicating resources or decorative fake
+cover artwork. Each card opens the relevant journey at its resource anchor.
 
-Search remains visible throughout the picker and resolves through
-`synonyms.yaml` live as a person types. The UI shows an exact match, ranked
-suggestions, or a clear no-match state with nearby moods; it never navigates on
-an uncertain match.
+**Search and guided routes.** The existing synonym search and disambiguation
+remain available. Common terms and the full `/feelings/` list work as native
+links. Guided routes keep their editorial rationales and optional refinements;
+no form requires an emotional destination or promises a mood change.
 
-When the search field is empty, show a small, editorially chosen set of common
-starting terms such as `anxious`, `lonely`, and `overwhelmed`. These are
-search shortcuts, not diagnostic labels, and they make the first interaction
-useful without forcing a person to understand the taxonomy or decode the
-floating field.
+**Explore.** `/explore/` retains the optional all-24-feeling field and search.
+Desktop physics is an enhancement only and pauses on narrow viewports, reduced
+motion, user pause and hidden pages. The mobile layout is a stable three-column
+grid. `/explore/[mood]/` shows the mood, explicit neighboring intensity links,
+and circles only for media types with published resources. Uncovered moods
+show an honest empty state. Routes are curator-defined, never wheel opposites.
 
-The static picker and result list are the complete no-JavaScript and
-assistive-technology experience. They are also the default on mobile. An
-explicit `Explore moods` control switches to the visual field without discarding
-the current search or refinements; an equally clear `Guided routes` control
-returns to the picker.
+**Resources.** Journey and media pages use readable cards with the title,
+creator, journey-specific rationale, time commitment, availability, content
+warnings, provenance and one external `Open resource` action. Details are
+visible without opening an accordion. Each card has a stable
+`#resource-<recommendation-id>` anchor, so collection links lead to a visible
+resource and show warnings before leaving the site.
 
-**Explore mode — the field.** Every wheel mood (8 primaries + intensity
-variants) is a floating bubble, positioned by a lightweight physics sim
-(spring-to-a-per-family rest point + small ambient jitter — continuous gentle
-drift, not static). It is an optional discovery surface, not a data
-visualization or a prerequisite for recommendations: every mood has a visible
-text label, and a broad family palette must not imply that an emotion is
-objectively good or bad. Valence and intensity always have text equivalents;
-colour, size, and motion are supporting cues only. Bubbles belonging to the
-same primary (e.g. Fear/Terror) are offset around their family's rest point
-rather than sharing one point, so they don't stack.
+**Navigation and accessibility.** Every state uses real static links under the
+GitHub Pages `/mood-travel/` base path. Browser Back/Forward, reload and sharing
+work without client routing. Escape and focus restoration enhance Explore
+navigation. Native links and forms, skip link, visible keyboard focus, labeled
+search, reduced-motion support and meaningful reading order are preserved.
+The common header, footer, filters and empty states share the neutral palette.
+No prototype switcher or snapshot catalog is shipped.
 
-Typing in the search box re-targets the physics sim live: the matched
-bubble is pulled to center and enlarged; everything else is pushed
-outward and faded. Matching is **prefix-scored** (exact label/synonym
-match, then label-prefix, then synonym-prefix) — deliberately not
-substring-anywhere, which produced false positives (e.g. "ra" matching
-Fear via the synonym "afraid").
-
-Ambient drift pauses while a person searches, focuses a bubble, or reads a
-resource. Zoom, blur, and movement are short, interruptible, and optional;
-the list path never depends on them.
-
-Every bubble reacts on hover (scale up + brighten), at every depth
-described below. Implementation note for whoever ports this to Astro:
-field bubbles have their position/scale rewritten every animation
-frame via JS, and an inline style always wins over a stylesheet rule
-for the same property — including `:hover` ones — so a plain CSS hover
-rule gets silently overwritten 60×/second. Fix: drive position/scale
-through CSS custom properties (`--tx`/`--ty`/`--s`) set from JS, and
-declare the actual `transform` only in the stylesheet, where `:hover`
-can cascade over the base rule normally.
-
-**Click a mood bubble → the ring.** The whole viewport zooms into the
-clicked bubble (CSS `transform: scale()` from the click point, +
-blur/darken behind). The bubble re-centers, enlarged, and a ring of the
-available type bubbles (Books / Music / Movies / Blogs / Podcasts) appears
-tethered to it by dashed lines. Each type bubble includes its available result
-count; zero-result types are absent rather than acting as dead ends. Also show
-at most three contextual `explore next` routes. Each route uses plain language
-(for example, `Toward calm` or `Toward connection`) and includes a short
-editorial rationale before a person follows it. Dyad-adjacent and same-family
-moods are candidate routes, not automatic recommendations.
-
-**Click a type bubble → the leaf.** Zooms further in, then presents an ordered,
-scannable resource list as the default reading and comparison surface. The
-optional orbiting item-bubble view remains available for visual exploration
-when the set is small enough to be useful, but it is never the only way to
-inspect resources. Item bubbles use a stable minimum tap target and cannot use
-size as the sole signal for tempo or importance.
-
-The list has filters for type, time commitment, availability, language, and
-content warnings. Ordering is editorial priority, not an implied measure of
-clinical effectiveness. Each row shows creator, concrete time commitment,
-availability, tempo as a text label, warnings, and its journey-specific
-rationale.
-
-**Click an item bubble → recursive expand.** Rather than a popover (tried
-and rejected — didn't fit the metaphor), the clicked bubble itself
-morphs in place: grows, its shape eases from a circle toward a rounded
-square, and it reveals its own title / tempo / link / note inline.
-Sibling bubbles shrink and fade outward to make room. Same interaction
-grammar as the mood → ring transition, one level deeper, applied
-recursively instead of introducing a new UI primitive per depth. The equivalent
-list row expands inline. Both detail treatments present the same information in
-the same order: title and creator, why it appears on this route, time and
-availability, content warnings, provenance, then one unmistakable `Open
-resource` external-link action.
-
-**Exit.** ESC or a contextual "← Back to …" button steps back exactly
-one level: collapse an expanded item first if one's open, else pop
-leaf → ring → field.
-
-**URL and history.** Every navigable state has a canonical URL (mood, journey,
-type, resource, and mode). Browser Back/Forward, reload, direct links, and
-sharing restore the same state. ESC remains an in-page convenience and never
-breaks browser history.
-
-### Accessibility, responsive behavior, and performance
-
-- Every interactive bubble is a native button or link with a descriptive
-  accessible name. Keyboard focus, Enter/Space activation, visible focus
-  indicators, logical focus transfer on zoom, and focus restoration on back are
-  required. The expanded detail has a readable semantic heading and external
-  link label.
-- Information is never conveyed by colour, bubble size, hover, or motion alone.
-  Tempo, valence, availability, and warnings always have text equivalents.
-- `prefers-reduced-motion` disables drift, zoom, and nonessential transitions;
-  a visible motion toggle pauses the field for everyone. Touch targets meet the
-  project accessibility standard, and hover has an equivalent focus/tap state.
-- On small screens the guided route picker/list view is the default, with an
-  explicit optional switch to Explore only when it remains usable. The field
-  must not hide search, back, crisis support, or focused content under animated
-  layers.
-- The page ships useful HTML and catalog links before JavaScript. The physics
-  island loads only when the enhanced field is selected, respects a defined
-  mobile performance budget (no animation work while hidden; no unbounded
-  frame loop outside the field; and the initial page JavaScript stays below the
-  project-approved gzip budget), and is covered by responsive visual regression
-  checks.
-
-Guided route path: `feeling → route choices → ordered resources → expanded
-resource`.
-
-Explore path: `field → ring (mood + available type-bubbles) → leaf (ordered
-list, optional item-bubbles) → expanded item (inline detail)`.
+**Deployment.** The `main` branch runs the GitHub Actions Pages workflow. Source
+changes must be integrated into `src/`; pushing standalone mockups does not
+change the published UI. Verification includes the Pages run for the pushed
+commit and the actual served homepage.
 
 ## Open questions
 

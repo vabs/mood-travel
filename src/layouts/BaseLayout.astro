@@ -5,9 +5,10 @@ import { withBase } from "../lib/site";
 interface Props {
   title: string;
   description?: string;
+  wide?: boolean;
 }
 
-const { title, description = "Find curated routes from how you feel now toward how you'd like to feel." } = Astro.props;
+const { title, description = "Find curated routes from how you feel now toward how you'd like to feel.", wide = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,21 +18,28 @@ const { title, description = "Find curated routes from how you feel now toward h
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · mood-travel</title>
     <meta name="description" content={description} />
+    <link rel="icon" href="data:," />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <a class="home-link" href={withBase("/")}>mood-travel</a>
+      <a class="home-link" href={withBase("/")}><span class="brand-mark" aria-hidden="true">↗</span>mood-travel.</a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href={withBase("/explore/")}>Explore moods</a>
+        <a href={withBase("/collection/")}>The collection <span aria-hidden="true">↗</span></a>
+      </nav>
+      <span class="header-note">Books, music &amp; other things.</span>
     </header>
-    <main id="main">
+    <main id="main" class:list={{ "wide-layout": wide }}>
       <slot />
     </main>
     <footer class="site-footer">
-      <p>
+      <a class="footer-brand" href={withBase("/")}>mood-travel</a><p>
         mood-travel is a discovery tool for finding things to read, watch, and
         listen to that may fit how you're feeling right now — it isn't
         medical advice, diagnosis, or crisis support.
       </p>
+      <span class="footer-note">Selected by people.</span>
     </footer>
   </body>
 </html>

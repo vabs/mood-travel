@@ -1,0 +1,30 @@
+---
+import { getCollection } from "astro:content";
+import { withBase } from "../lib/site";
+
+const moods = await getCollection("moods");
+const families = [
+  { id: "joy", note: "A little light", x: 30, y: 20, size: 133 },
+  { id: "trust", note: "Something steady", x: 70, y: 16, size: 112 },
+  { id: "fear", note: "A little on edge", x: 82, y: 45, size: 133 },
+  { id: "surprise", note: "The unexpected", x: 78, y: 74, size: 112 },
+  { id: "sadness", note: "A heavier day", x: 47, y: 81, size: 130 },
+  { id: "disgust", note: "Something feels off", x: 18, y: 74, size: 103 },
+  { id: "anger", note: "A little fire", x: 12, y: 43, size: 119 },
+  { id: "anticipation", note: "What's ahead", x: 48, y: 41, size: 115 },
+];
+---
+
+<div class="mood-atlas">
+  <ul class="atlas-bubbles" aria-label="Explore a mood family">
+    {families.map(({ id, note, x, y, size }) => (
+      <li style={`--x:${x}%;--y:${y}%;--size:${size}px;`}>
+        <a class="atlas-bubble" href={withBase(`/explore/${id}/`)} data-mood-id={id}>
+          <strong>{moods.find((mood) => mood.data.id === id)!.data.label}</strong>
+          <span>{note}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p class="atlas-caption">Choose what feels closest.</p>
+</div>

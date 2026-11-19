@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { TYPE_LABELS } from "../lib/explore";
+import { withBase } from "../lib/site";
+
+interface Props {
+  resource: CollectionEntry<"resources">["data"];
+  recommendation: CollectionEntry<"recommendations">["data"];
+}
+const { resource, recommendation } = Astro.props;
+const icons = { book: "▤", music: "♫", movie: "▷", blog: "≋", podcast: "◉" };
+---
+
+<a class="resource-preview" href={withBase(`/journey/${recommendation.journey_id.id}/#resource-${recommendation.id}`)}>
+  <div class="preview-head">
+    <span class="media-mark" aria-hidden="true">{icons[resource.type]}</span>
+    <span>{TYPE_LABELS[resource.type]}</span>
+    <span class="preview-duration">{resource.duration ?? "At your pace"}</span>
+  </div>
+  <h3>{resource.title}</h3>
+  <p class="preview-creator">{resource.creator}</p>
+  <span class="preview-bottom"><span>View recommendation</span><span aria-hidden="true">↗</span></span>
+</a>

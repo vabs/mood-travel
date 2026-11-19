@@ -40,7 +40,7 @@ const {
 const domain = new URL(canonicalUrl).hostname.replace(/^www\./, "");
 ---
 
-<details
+<article
   class="resource-row"
   id={`resource-${id}`}
   data-type={type}
@@ -48,7 +48,7 @@ const domain = new URL(canonicalUrl).hostname.replace(/^www\./, "");
   data-availability={availability}
   data-warnings={contentWarnings.join(" ")}
 >
-  <summary>{title} — <span class="creator">{creator}</span></summary>
+  <div class="resource-heading"><p class="eyebrow">{type === "blog" ? "Article" : type === "movie" ? "Film" : type}</p><h3>{title}</h3><p class="creator">{creator}</p></div>
   <div class="resource-detail">
     <p>{rationale}</p>
     <p class="commitment">
@@ -65,4 +65,4 @@ const domain = new URL(canonicalUrl).hostname.replace(/^www\./, "");
       Open resource →
     </a>
   </div>
-</details>
+</article>

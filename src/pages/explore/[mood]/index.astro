@@ -47,6 +47,7 @@ export async function getStaticPaths() {
       params: { mood: mood.data.id },
       props: {
         mood: mood.data,
+        neighbors: moods.filter((candidate) => candidate.data.family === mood.data.family).sort((a, b) => ["mild", "medium", "intense"].indexOf(a.data.intensity) - ["mild", "medium", "intense"].indexOf(b.data.intensity)).map((candidate) => candidate.data),
         types: typeEntries.map(([type, count], i) => ({
           type,
           count,
@@ -58,7 +59,7 @@ export async function getStaticPaths() {
   });
 }
 
-const { mood, types, chips } = Astro.props;
+const { mood, types, chips, neighbors } = Astro.props;
 ---
 
 <BaseLayout
@@ -72,6 +73,9 @@ const { mood, types, chips } = Astro.props;
 
   <h1>{mood.label}</h1>
   <p class="ring-description">{mood.short_description}</p>
+  <ul class="feeling-neighbors" aria-label={`Feelings in the ${mood.family} family`}>
+    {neighbors.map((neighbor) => <li><a href={withBase(`/explore/${neighbor.id}/`)} aria-current={neighbor.id === mood.id ? "page" : undefined}>{neighbor.label}</a></li>)}
+  </ul>
 
   <div class="mood-ring" style={`--center-bg:var(--family-${mood.family});`}>
     <p class="ring-center" data-family={mood.family}>{mood.label}</p>
